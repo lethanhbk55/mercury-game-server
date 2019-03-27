@@ -1,0 +1,41 @@
+<mercury>
+	<name>[plugin name]</name>
+
+	<zone>
+		<name>[zone name]</name>
+		<handle>[handle class]</handle>
+
+		<scheduler>
+			<counter>4</counter>
+			<workerpool>
+				<poolsize>8</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>Scheduled Worker #%d</threadnamepattern>
+			</workerpool>
+		</scheduler>
+
+		<variables>
+			
+		</variables>
+	</zone>
+
+	<lifecycles>
+		<entry>
+			<name>[life cycle name]</name>
+			<handle>[handle class]</handle>
+			<variables></variables>
+		</entry>
+
+		<plugin>
+			<name>[handler name]</name>
+			<handle>[handle class]</handle>
+			<variables></variables>
+		</plugin>
+
+		<managedobject>
+			<name>[managed object name]</name>
+			<handle>[handle class]</handle>
+			<variables></variables>
+		</managedobject>
+	</lifecycles>
+</mercury>

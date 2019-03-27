@@ -1,0 +1,66 @@
+<project name="MGSServerApi" default="deploy">
+	<property name="build.classes" value="bin" />
+	<property name="lib" value="lib" />
+	<property name="dist" value="dist" />
+	<property name="dist.ext" value="${dist}/ext" />
+	<property name="dist.jar" value="${dist}/jar" />
+	<buildnumber file="build.number" />
+	<property file="build.properties" />
+	<property name="jar.name" value="${ant.project.name}-build.${build.number}.jar" />
+
+
+	<target name="clean">
+		<delete dir="${dist}">
+		</delete>
+	</target>
+
+	<target name="prep">
+		<mkdir dir="${dist}" />
+		<mkdir dir="${dist.ext}" />
+		<mkdir dir="${dist.jar}" />
+	</target>
+
+	<target name="build" depends="clean, prep">
+		<jar destfile="${dist.jar}/${jar.name}">
+			<fileset dir="${build.classes}">
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="pack" depends="build">
+		<copy todir="${dist.ext}" failonerror="false">
+			<fileset dir="${lib}">
+				<include name="*.jar" />
+			</fileset>
+			<fileset dir="${dist.jar}">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="deploy" depends="pack">
+		<delete failonerror="false">
+			<fileset dir="${deploy.path}">
+				<include name="${ant.project.name}*.jar" />
+			</fileset>
+		</delete>
+
+		<copy todir="${deploy.path}">
+			<fileset dir="${dist.ext}">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+
+		<delete failonerror="false">
+			<fileset dir="${simms_admin.path}">
+				<include name="${ant.project.name}*.jar" />
+			</fileset>
+		</delete>
+
+		<copy todir="${simms_admin.path}">
+			<fileset dir="${dist.ext}">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+	</target>
+</project>

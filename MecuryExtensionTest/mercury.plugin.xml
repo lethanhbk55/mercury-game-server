@@ -1,0 +1,44 @@
+<mercury>
+	<name>MercuryExtensionTest</name>
+
+	<zone>
+		<name>TestZone</name>
+		<handle>com.mercury.extension.test.TestZonePlugin</handle>
+		<workerpool>
+			<poolsize>8</poolsize>
+			<ringbuffersize>2048</ringbuffersize>
+			<threadnamepattern>Input Worker #%d</threadnamepattern>
+		</workerpool>
+
+		<scheduler>
+			<counter>4</counter>
+			<workerpool>
+				<poolsize>8</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>Scheduled Worker #%d</threadnamepattern>
+			</workerpool>
+		</scheduler>
+
+		<variables>
+
+		</variables>
+	</zone>
+
+	<lifecycles>
+		<entry>
+			<name>TestLifeCycle</name>
+			<handle>com.mercury.extension.test.lifecycle.TestLifeCycle</handle>
+			<variables>
+				<variable name="name" type="string">thanh</variable>
+			</variables>
+		</entry>
+
+		<entry>
+			<name>VirtualWorldInitializer</name>
+			<handle>com.mercury.extension.test.lifecycle.VirtualWorldInitializer</handle>
+			<variables>
+
+			</variables>
+		</entry>
+	</lifecycles>
+</mercury>
