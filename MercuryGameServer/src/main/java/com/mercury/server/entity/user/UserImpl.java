@@ -13,6 +13,7 @@ public class UserImpl implements User {
 	private Map<String, PuValue> userVariables;
 	private String ip;
 	private Room lastJoinedRoom;
+	private long loginTime;
 
 	public UserImpl() {
 		userVariables = new ConcurrentHashMap<>();
@@ -78,6 +79,14 @@ public class UserImpl implements User {
 	@Override
 	public boolean containsVariable(String key) {
 		return this.userVariables.containsKey(key);
+	}
+
+	public long getLoginTime() {
+		return loginTime;
+	}
+
+	public void setLoginTime(long loginTime) {
+		this.loginTime = loginTime;
 	}
 
 }

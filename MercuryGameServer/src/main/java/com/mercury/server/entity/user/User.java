@@ -24,4 +24,6 @@ public interface User {
 	void setUserVariables(Map<String, PuValue> userVariables);
 	
 	Room getLastJoinedRoom();
+	
+	long getLoginTime();
 }

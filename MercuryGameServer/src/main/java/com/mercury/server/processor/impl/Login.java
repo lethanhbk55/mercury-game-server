@@ -58,6 +58,8 @@ public class Login extends MGSAbstractProcessor {
 		}
 
 		user.setIP(socketSession.getRemoteAddress().getHostString());
+		user.setLoginTime(System.currentTimeMillis());
+		
 		try {
 			zone.getUserManager().addUser(user);
 		} catch (UserAlreadyLoggedInException e) {
