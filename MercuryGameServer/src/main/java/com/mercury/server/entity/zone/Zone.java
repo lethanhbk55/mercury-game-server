@@ -7,6 +7,7 @@ import com.mercury.server.callback.JoinRoomCallback;
 import com.mercury.server.entity.room.Room;
 import com.mercury.server.entity.room.RoomManager;
 import com.mercury.server.entity.user.UserManager;
+import com.mercury.server.navigator.JoinRoomNavigator;
 import com.mercury.server.plugin.PluginManager;
 import com.mercury.server.plugin.ZonePlugin;
 import com.nhb.common.data.PuValue;
@@ -36,6 +37,8 @@ public interface Zone {
 	PuValue getZoneVariable(String key);
 
 	JoinRoomCallback getJoinRoomCallback();
+
+	JoinRoomNavigator getJoinRoomNavigator();
 
 	boolean variableExists(String key);
 }

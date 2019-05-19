@@ -17,6 +17,7 @@ import com.mercury.server.entity.user.UserManager;
 import com.mercury.server.event.reason.UserDisconnectReason;
 import com.mercury.server.event.reason.UserLeaveRoomReason;
 import com.mercury.server.exception.MGSException;
+import com.mercury.server.navigator.JoinRoomNavigator;
 import com.mercury.server.plugin.PluginManager;
 import com.mercury.server.plugin.ZonePlugin;
 import com.mercury.server.response.impl.LoginResponse;
@@ -109,6 +110,7 @@ public class ZoneImpl extends BaseLoggable implements Zone {
 	private MGSScheduledService scheduledService;
 	private Map<String, PuValue> zoneVariables;
 	private JoinRoomCallback joinRoomCallback;
+	private JoinRoomNavigator joinRoomNavigator;
 
 	private ZoneImpl() {
 		roomManager = new RoomManager();
@@ -302,4 +304,11 @@ public class ZoneImpl extends BaseLoggable implements Zone {
 		return this.zoneVariables.containsKey(key);
 	}
 
+	public JoinRoomNavigator getJoinRoomNavigator() {
+		return joinRoomNavigator;
+	}
+
+	public void setJoinRoomNavigator(JoinRoomNavigator joinRoomNavigator) {
+		this.joinRoomNavigator = joinRoomNavigator;
+	}
 }

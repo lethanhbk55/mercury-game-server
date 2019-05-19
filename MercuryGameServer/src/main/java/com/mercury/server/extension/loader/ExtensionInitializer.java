@@ -9,6 +9,7 @@ import com.mercury.server.entity.zone.ZoneImpl;
 import com.mercury.server.entity.zone.ZoneManager;
 import com.mercury.server.extension.config.SchedulerConfig;
 import com.mercury.server.extension.config.ZoneConfig;
+import com.mercury.server.navigator.JoinRoomNavigator;
 import com.mercury.server.plugin.PluginManager;
 import com.mercury.server.plugin.ZonePlugin;
 import com.mercury.server.processor.ProcessorManager;
@@ -52,6 +53,17 @@ public class ExtensionInitializer extends BaseLoggable {
 						zone.setJoinRoomCallback(joinRoomCallback);
 					}
 				}
+
+				if (zoneConfig.getJoinRoomNavigatorClass() != null) {
+					JoinRoomNavigator joinRoomNavigator = extensionManager.newInstance(zoneConfig.getExtensionName(),
+							zoneConfig.getJoinRoomNavigatorClass());
+					if (joinRoomNavigator != null) {
+						joinRoomNavigator.setMarioApi(this.pluginApiFactory.newMarioApi());
+						joinRoomNavigator.setPluginApi(this.pluginApiFactory.newPluginApi(zone.getZoneName()));
+						zone.setJoinRoomNavigator(joinRoomNavigator);
+					}
+				}
+
 				SchedulerConfig schedulerConfig = zoneConfig.getSchedulerConfig();
 				zone.setScheduledService(new MGSScheduledService(schedulerConfig));
 				zonePlugin.init(zoneConfig.getInitParams());

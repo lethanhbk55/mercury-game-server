@@ -12,6 +12,7 @@ public class ZoneConfig extends MarioBaseConfig {
 	private SchedulerConfig schedulerConfig;
 	private PuObject initParams;
 	private String joinRoomCallbackClass;
+	private String joinRoomNavigatorClass;
 
 	public String getHandleClass() {
 		return handleClass;
@@ -56,6 +57,14 @@ public class ZoneConfig extends MarioBaseConfig {
 
 	public void setJoinRoomCallbackClass(String joinRoomCallbackClass) {
 		this.joinRoomCallbackClass = joinRoomCallbackClass;
+	}
+
+	public String getJoinRoomNavigatorClass() {
+		return joinRoomNavigatorClass;
+	}
+
+	public void setJoinRoomNavigatorClass(String joinRoomNavigator) {
+		this.joinRoomNavigatorClass = joinRoomNavigator;
 	}
 
 }

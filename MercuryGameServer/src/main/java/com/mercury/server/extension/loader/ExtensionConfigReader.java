@@ -53,6 +53,7 @@ final class ExtensionConfigReader extends XmlConfigReader {
 				(Node) xPath.compile("scheduler").evaluate(node, XPathConstants.NODE));
 		Object variableObj = xPath.compile("variables").evaluate(node, XPathConstants.NODE);
 		Object joinRoomCallbackObj = xPath.compile("joinRoomCallback").evaluate(node, XPathConstants.NODE);
+		Object joinRoomNavigator = xPath.compile("joinRoomNavigator").evaluate(node, XPathConstants.NODE);
 
 		this.zoneConfig = new ZoneConfig();
 		this.zoneConfig.setName(zoneName);
@@ -64,8 +65,12 @@ final class ExtensionConfigReader extends XmlConfigReader {
 			this.zoneConfig.setInitParams(PuObject.fromXML((Node) variableObj));
 		}
 
-		if (joinRoomCallbackObj != null) {
+		if (joinRoomNavigator != null) {
 			this.zoneConfig.setJoinRoomCallbackClass(((Node) joinRoomCallbackObj).getTextContent());
+		}
+
+		if (joinRoomNavigator != null) {
+			this.zoneConfig.setJoinRoomNavigatorClass(((Node) joinRoomNavigator).getTextContent());
 		}
 	}
 

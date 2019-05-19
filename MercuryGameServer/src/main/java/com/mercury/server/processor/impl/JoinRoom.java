@@ -28,7 +28,18 @@ public class JoinRoom extends MGSAbstractProcessor {
 			throw new ProcessMessageException("request zone " + message.getZoneName() + " doesn't exists");
 		}
 
-		Room room = zone.getRoomManager().findRoomById(request.getRoomId());
+		int roomId = request.getRoomId();
+
+		User user = zone.getUserManager().getBySessionId(sessionId);
+		if (user == null) {
+			throw new ProcessMessageException("User not join to zone but want to join room, sessionId: " + sessionId);
+		}
+		
+		if (zone.getJoinRoomNavigator() != null) {
+			roomId = zone.getJoinRoomNavigator().navigate(user, roomId);
+		}
+
+		Room room = zone.getRoomManager().findRoomById(roomId);
 		if (room == null) {
 			JoinRoomResponse response = new JoinRoomResponse();
 			response.setRoomId(request.getRoomId());
@@ -38,10 +49,6 @@ public class JoinRoom extends MGSAbstractProcessor {
 			return response;
 		}
 
-		User user = zone.getUserManager().getBySessionId(sessionId);
-		if (user == null) {
-			throw new ProcessMessageException("User not join to zone but want to join room, sessionId: " + sessionId);
-		}
 
 		if (room.hasPassword()) {
 			String password = request.getPassword();
