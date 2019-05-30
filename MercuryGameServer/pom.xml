@@ -99,7 +99,7 @@
 		<dependency>
 			<groupId>com.mario</groupId>
 			<artifactId>mario3</artifactId>
-			<version>1.0.3</version>
+			<version>1.0.7</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -110,7 +110,7 @@
 		<dependency>
 			<groupId>com.mercury</groupId>
 			<artifactId>mgs-server-api</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.reflections</groupId>
