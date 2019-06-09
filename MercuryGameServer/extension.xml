@@ -4,72 +4,39 @@
 	<name>MercuryGameServer</name>
 
 	<datasources>
-		<hazelcast>
-			<name>simms_hazelcast</name>
-			<lazyinit>true</lazyinit>
-			<member>true</member>
-			<config>conf/hazelcast.xml</config>
-		</hazelcast>
-		
-		<mongodb>
+		<!-- Turn on if your game server need to use database -->
+		<!-- <mongodb> 
 			<name>simms_mongodb</name>
 			<endpoint>
 				<entry>127.0.0.1:27017</entry>
 			</endpoint>
 			<credentials>
 				<entry>
-					<username>thanh</username>
+					<username>root</username>
 					<password>123456</password>
 					<authdb>admin</authdb>
 				</entry>
 			</credentials>
-		</mongodb>
+		</mongodb> -->
 
 	</datasources>
 
 	<servers>
-		<rabbitmq>
+		<!-- <rabbitmq>
 			<name>mercury_rabbitmq_server</name>
 			<endpoint>
 				<entry>localhost:5672</entry>
 			</endpoint>
 			<credential>
 				<username>root</username>
-				<password>sandbox36</password>
+				<password>passsword</password>
 			</credential>
 			<autoreconnect>true</autoreconnect>
-		</rabbitmq>
+		</rabbitmq> -->
 	</servers>
 
 	<producers>
-		<rabbitmq>
-			<name>asset_producer</name>
-			<server>mercury_rabbitmq_server</server>
-			<timeout>5000</timeout>
-			<queue>
-				<name>asset_queue</name>
-				<type>rpc</type>
-			</queue>
-		</rabbitmq>
-
-		<kafka>
-			<name>uams_producer</name>
-			<config>conf/producer.properties</config>
-			<topic>amun.uams</topic>
-		</kafka>
-
-		<kafka>
-			<name>als_producer</name>
-			<config>conf/producer.properties</config>
-			<topic>gaia.als</topic>
-		</kafka>
-
-		<kafka>
-			<name>gs_producer</name>
-			<config>conf/producer.properties</config>
-			<topic>amun.gs</topic>
-		</kafka>
-
+		
 	</producers>
 
 	<gateways>
@@ -104,11 +71,9 @@
 				<ringbuffersize>1048576</ringbuffersize>
 				<threadnamepattern>Mercury I/O WS Worker #%d</threadnamepattern>
 			</workerpool>
-			<ssl>true</ssl>
-			<keyFile>conf/hoba_club.key</keyFile>
 		</socket>
 
-		<rabbitmq>
+		<!-- <rabbitmq>
 			<name>mercury_forward_gateway</name>
 			<server>mercury_rabbitmq_server</server>
 			<queue>
@@ -122,7 +87,7 @@
 				<ringbuffersize>2048</ringbuffersize>
 				<threadnamepattern>MGS Fwd Worker #%d</threadnamepattern>
 			</workerpool>
-		</rabbitmq>
+		</rabbitmq> -->
 	</gateways>
 
 	<lifecycles>
@@ -136,17 +101,17 @@
 			</bind>
 			<variables>
 				<variable name="idle" type="integer">30</variable>
-				
 			</variables>
 		</handler>
 
-		<handler>
+		<!-- Turn it on if you need call server to server to interact with MGS through RabbitMQ gateway -->
+		<!-- <handler>
 			<name>mercury-forward-message-handler</name>
 			<handle>com.mercury.server.MGSForwardMessageHandler</handle>
 			<bind>
 				<gateway>mercury_forward_gateway</gateway>
 			</bind>
-		</handler>
+		</handler> -->
 
 	</lifecycles>
 </mario>

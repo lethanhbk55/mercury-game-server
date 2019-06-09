@@ -1,9 +1,11 @@
 <mercury>
-	<name>[plugin name]</name>
+	<name>[plugin name]</name> <!-- Same folder name under folder plugins -->
 
 	<zone>
 		<name>[zone name]</name>
 		<handle>[handle class]</handle>
+		<joinRoomCallback>[join room callback class default null]</joinRoomCallback>
+		<joinRoomNavigator>[navigator class default null]</joinRoomNavigator>
 
 		<scheduler>
 			<counter>4</counter>

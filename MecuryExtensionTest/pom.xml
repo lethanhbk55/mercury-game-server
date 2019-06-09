@@ -3,8 +3,10 @@
 	<groupId>com.mercury</groupId>
 	<artifactId>mercury-extension-test</artifactId>
 	<version>1.0.0</version>
+	<properties>
+		<extension.name>${project.name}</extension.name>
+	</properties>
 	<build>
-		<sourceDirectory>src/main/java</sourceDirectory>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -14,19 +16,95 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<id>pack</id>
+						<phase>prepare-package</phase>
+						<configuration>
+							<target>
+								<delete failonerror="false">
+									<fileset dir="${project.build.directory}/${extension.name}" />
+								</delete>
+								<mkdir dir="${project.build.directory}/${extension.name}" />
+								<mkdir dir="${project.build.directory}/${extension.name}/conf" />
+								<mkdir dir="${project.build.directory}/${extension.name}/lib" />
+								<mkdir dir="${project.build.directory}/${extension.name}/resources" />
+
+								<copy todir="${project.build.directory}/${extension.name}" failonerror="false">
+									<fileset file="${project.basedir}/mercury.plugin*.xml" />
+								</copy>
+								<copy todir="${project.build.directory}/${extension.name}/conf" failonerror="false">
+									<fileset dir="${project.basedir}/conf" />
+								</copy>
+								<copy todir="${project.build.directory}/${extension.name}/resources" failonerror="false">
+									<fileset dir="${project.basedir}/resources" />
+								</copy>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					
+					<execution>
+						<id>deploy</id>
+						<phase>install</phase>
+						<configuration>
+							<target>
+								<echo message="***************copy from ${project.build.directory} to ${project.build.directory}/${extension.name}/lib"></echo>
+
+								<copy todir="${project.build.directory}/${extension.name}/lib">
+									<fileset dir="${project.build.directory}">
+										<include name="${project.artifactId}-${project.version}.jar" />
+									</fileset>
+								</copy>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.8</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/${extension.name}/lib</outputDirectory>
+							<overWriteReleases>true</overWriteReleases>
+							<overWriteSnapshots>false</overWriteSnapshots>
+							<overWriteIfNewer>true</overWriteIfNewer>
+							<excludeScope>provided</excludeScope>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
 		<dependency>
 			<groupId>com.mario</groupId>
 			<artifactId>mario3</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.7</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.mercury</groupId>
 			<artifactId>mercury-game-server</artifactId>
-			<version>1.2.1</version>
+			<version>1.3.0</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
