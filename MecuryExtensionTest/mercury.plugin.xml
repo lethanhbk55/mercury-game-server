@@ -40,5 +40,14 @@
 
 			</variables>
 		</entry>
+		
+		<plugin>
+			<name>helloPlugin</name>
+			<handle>com.mercury.extension.test.plugin.HelloPlugin</handle>
+			<variables>
+				<variable name="number" type="integer">77</variable>
+				<variable name="district" type="string">District 3</variable>
+			</variables>
+		</plugin>
 	</lifecycles>
 </mercury>

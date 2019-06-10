@@ -13,9 +13,8 @@ public class TestMGSClient extends BaseLoggable {
 
 	public static void main(String[] args) throws IOException {
 		System.out.println("Open connect to MiniGame Server");
-		final BaseMGSClient client = new BaseMGSClient("Simms", TransportProtocol.TCP);
-		// client.connect(args[0], Integer.parseInt(args[1]));
-		client.connect("dev.261e825f609d4a7c0bd39cd49db561b3.com", 9923);
+		final TestZoneMGSClient client = new TestZoneMGSClient("TestZone", TransportProtocol.TCP);
+		client.connect("localhost", 9922);
 
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
