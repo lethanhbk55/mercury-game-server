@@ -1,5 +1,5 @@
 ## Giới thiệu
-MercuryGameServer được thiết kế tương tự như SmartFoxServer hay ElectroServer, cho phép bạn tự do thiết kế các `plugins` cắm vào MercuryGameServer để chạy thông qua việc cài đặt các file thư viện (.jar) và định nghĩa class handle thông qua `mercury.plugin.xml`
+> MercuryGameServer được thiết kế tương tự như SmartFoxServer hay ElectroServer, cho phép bạn tự do thiết kế các `plugins` cắm vào MercuryGameServer để chạy thông qua việc cài đặt các file thư viện (.jar) và định nghĩa class handle thông qua `mercury.plugin.xml`
 
 MGS là 1 extension run dưới Mario, và nó cũng thiết kế tương tự như Mario cho phép các load `plugins` đặt dưới thư mục `Mario/extensions/MercuryGameServer/plugins`
 
@@ -55,8 +55,8 @@ public void userLoggedIn(User user) {
 ## ZonePlugin và RoomPlugin trong MGS
 Trong khi phát triển app hay game, chúng ta luôn có nhiều nghiệp vụ cần chia tách, có thể chia cho nhiều team, và để dễ quản lý theo từng miền nghiệp vụ. Do đó MGS cung cấp cơ chế cho plugin có thể khai báo nhiều Plugin con để chia tách miền nghiệp vụ
 
-* ZonePlugin khai báo ngay trong `lifecycles` của `mercury.plugin.xml`
-* RoomPlugin là plugin xử lý gắn liền với room, class được khai báo khi tạo room
+* **ZonePlugin** khai báo ngay trong `lifecycles` của `mercury.plugin.xml`
+* **RoomPlugin** là plugin xử lý gắn liền với room, class được khai báo khi tạo room
 
 Đăng ký và tạo HelloPlugin
 
