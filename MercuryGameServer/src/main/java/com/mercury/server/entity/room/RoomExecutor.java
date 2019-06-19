@@ -1,7 +1,7 @@
 package com.mercury.server.entity.room;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.mario.config.WorkerPoolConfig;
 import com.mercury.server.extension.config.RoomConfig;
@@ -9,21 +9,19 @@ import com.nhb.common.async.executor.DisruptorAsyncTaskExecutor;
 
 public class RoomExecutor {
 
-	private Map<Integer, DisruptorAsyncTaskExecutor> executors = new HashMap<>();
-	private int size;
+	private List<DisruptorAsyncTaskExecutor> executors = new ArrayList<>();
 
 	public RoomExecutor(RoomConfig roomConfig) {
 		WorkerPoolConfig workerPoolConfig = roomConfig.getWorkerPoolConfig();
-		this.size = workerPoolConfig.getPoolSize();
 		for (int i = 0; i < workerPoolConfig.getPoolSize(); i++) {
-			this.executors.put(i,
-					DisruptorAsyncTaskExecutor.createSingleProducerExecutor(workerPoolConfig.getRingBufferSize(), 1,
-							String.format(workerPoolConfig.getThreadNamePattern(), i)));
+			this.executors
+					.add(DisruptorAsyncTaskExecutor.createSingleProducerExecutor(workerPoolConfig.getRingBufferSize(),
+							1, String.format(workerPoolConfig.getThreadNamePattern(), i)));
 		}
 	}
 
 	public void start() {
-		for (DisruptorAsyncTaskExecutor executor : this.executors.values()) {
+		for (DisruptorAsyncTaskExecutor executor : this.executors) {
 			executor.start();
 		}
 	}
@@ -38,12 +36,12 @@ public class RoomExecutor {
 	}
 
 	public DisruptorAsyncTaskExecutor getExecutor(int roomId) {
-		int executorId = roomId % size;
+		int executorId = roomId % this.executors.size();
 		return this.executors.get(executorId);
 	}
 
 	public void shutdown() {
-		for (DisruptorAsyncTaskExecutor executor : this.executors.values()) {
+		for (DisruptorAsyncTaskExecutor executor : this.executors) {
 			try {
 				executor.shutdown();
 			} catch (Exception e) {
