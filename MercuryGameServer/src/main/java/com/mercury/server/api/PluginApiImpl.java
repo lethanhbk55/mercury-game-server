@@ -176,18 +176,11 @@ class PluginApiImpl extends BaseLoggable implements PluginApi {
 		Room room = this.zone.findRoomById(roomId);
 		User user = this.zone.getUserManager().getByUsername(username);
 		if (room != null && user != null) {
-			this.execute(new ScheduledCallback() {
-
-				@Override
-				public void call() {
-					try {
-						((AbstractRoom) room).leaveRoom(user, UserLeaveRoomReason.KICKED, code);
-					} catch (MGSException e) {
-						getLogger().debug("kick user {} get error", username, e);
-					}
-				}
-			});
-
+			try {
+				((AbstractRoom) room).leaveRoom(user, UserLeaveRoomReason.KICKED, code);
+			} catch (MGSException e) {
+				getLogger().debug("kick user {} get error", username, e);
+			}
 			return true;
 		}
 		return false;

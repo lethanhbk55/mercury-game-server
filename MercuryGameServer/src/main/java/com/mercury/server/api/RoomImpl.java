@@ -49,21 +49,17 @@ class RoomImpl extends AbstractRoom implements Room {
 			getLogger().info("User {} has joined room {}", user.getUsername(), getRoomId());
 
 			getMessenger().sendJoinRoomSuccess(user, getRoomId());
-			try {
-				this.getExecutor().execute(new Runnable() {
+			this.getExecutor().execute(new Runnable() {
 
-					@Override
-					public void run() {
-						try {
-							RoomImpl.this.getRoomPlugin().userDidEnter(user);
-						} catch (Exception e) {
-							getLogger().error("user {} entered get error", user.getUsername(), e);
-						}
+				@Override
+				public void run() {
+					try {
+						RoomImpl.this.getRoomPlugin().userDidEnter(user);
+					} catch (Exception e) {
+						getLogger().error("user {} entered get error", user.getUsername(), e);
 					}
-				});
-			} catch (Exception e) {
-				getLogger().error("user {} entered get error", user.getUsername(), e);
-			}
+				}
+			});
 		}
 	}
 
@@ -82,21 +78,17 @@ class RoomImpl extends AbstractRoom implements Room {
 			getLogger().info("User {} has left room {}", user.getUsername(), getRoomId());
 
 			this.getMessenger().sendLeaveRoomSuccess(user, getRoomId(), reason, code);
-			try {
-				this.getExecutor().execute(new Runnable() {
+			this.getExecutor().execute(new Runnable() {
 
-					@Override
-					public void run() {
-						try {
-							RoomImpl.this.getRoomPlugin().userDidExit(user);
-						} catch (Exception e) {
-							getLogger().error("user {} leaved room error", user.getUsername(), e);
-						}
+				@Override
+				public void run() {
+					try {
+						RoomImpl.this.getRoomPlugin().userDidExit(user);
+					} catch (Exception e) {
+						getLogger().error("user {} leaved room error", user.getUsername(), e);
 					}
-				});
-			} catch (Exception e) {
-				getLogger().error("user {} leaved room error", user.getUsername(), e);
-			}
+				}
+			});
 		}
 	}
 
