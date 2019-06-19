@@ -2,13 +2,15 @@ package com.mercury.server.entity.zone;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.mario.api.MarioApi;
 import com.mario.gateway.socket.SocketSession;
-import com.mario.schedule.ScheduledCallback;
 import com.mercury.server.callback.JoinRoomCallback;
 import com.mercury.server.entity.room.AbstractRoom;
 import com.mercury.server.entity.room.Room;
+import com.mercury.server.entity.room.RoomExecutor;
 import com.mercury.server.entity.room.RoomManager;
 import com.mercury.server.entity.session.SessionManager;
 import com.mercury.server.entity.user.User;
@@ -22,13 +24,18 @@ import com.mercury.server.plugin.PluginManager;
 import com.mercury.server.plugin.ZonePlugin;
 import com.mercury.server.response.impl.LoginResponse;
 import com.mercury.server.response.impl.LogoutResponse;
-import com.mercury.server.schedule.MGSScheduledService;
 import com.nhb.common.BaseLoggable;
+import com.nhb.common.async.executor.DisruptorAsyncTaskExecutor;
 import com.nhb.common.data.PuValue;
 import com.nhb.eventdriven.Callable;
 import com.nhb.eventdriven.Event;
 import com.nhb.eventdriven.EventHandler;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class ZoneImpl extends BaseLoggable implements Zone {
 
 	class AddUserEventHandler implements EventHandler {
@@ -39,20 +46,8 @@ public class ZoneImpl extends BaseLoggable implements Zone {
 			User user = userEvent.getUser();
 			getLogger().info("User {} loggged in and join to zone {}", user.getUsername(), ZoneImpl.this.getZoneName());
 			sessionManager.addSessionToZone(user.getSessionId(), ZoneImpl.this);
-
 			sendLoginSuccess(user);
-
-			getScheduledService().execute(new ScheduledCallback() {
-
-				@Override
-				public void call() {
-					try {
-						zonePlugin.userLoggedIn(user);
-					} catch (Exception e) {
-						getLogger().error("Zone Plugin handle user logged in exception", e);
-					}
-				}
-			});
+			plugin.userLoggedIn(user);
 		}
 	}
 
@@ -66,36 +61,24 @@ public class ZoneImpl extends BaseLoggable implements Zone {
 			sessionManager.removeSession(user.getSessionId());
 
 			getLogger().debug("remove user success {}", user.getUsername());
-			ScheduledCallback callback = new ScheduledCallback() {
-
-				@Override
-				public void call() {
-					try {
-						Room lastJoinedRoom = user.getLastJoinedRoom();
-						if (lastJoinedRoom != null && lastJoinedRoom instanceof AbstractRoom) {
-							UserLeaveRoomReason leaveRoomReason = reason == UserDisconnectReason.KICKED
-									? UserLeaveRoomReason.KICKED
-									: UserLeaveRoomReason.LEAVE_ROOM;
-							try {
-								((AbstractRoom) lastJoinedRoom).leaveRoom(user, leaveRoomReason, null);
-							} catch (MGSException e) {
-								getLogger().warn("user {} disconnect to leave room", user.getUsername());
-							}
-						}
-						sendLogoutSucess(user, reason);
-						getLogger().info("[DISCONNECT] user {} disconnected from zone {}", user.getUsername(),
-								ZoneImpl.this.getZoneName());
-						zonePlugin.userDisconnect(user, reason);
-						Callable callback = userEvent.getCallback();
-						if (callback != null) {
-							callback.call(user);
-						}
-					} catch (Exception e) {
-						getLogger().error("handle user leave zone get exception", e);
-					}
+			Room lastJoinedRoom = user.getLastJoinedRoom();
+			if (lastJoinedRoom != null && lastJoinedRoom instanceof AbstractRoom) {
+				UserLeaveRoomReason leaveRoomReason = reason == UserDisconnectReason.KICKED ? UserLeaveRoomReason.KICKED
+						: UserLeaveRoomReason.LEAVE_ROOM;
+				try {
+					((AbstractRoom) lastJoinedRoom).leaveRoom(user, leaveRoomReason, null);
+				} catch (MGSException e) {
+					getLogger().warn("user {} disconnect to leave room", user.getUsername());
 				}
-			};
-			getScheduledService().execute(callback);
+			}
+			sendLogoutSucess(user, reason);
+			getLogger().info("[DISCONNECT] user {} disconnected from zone {}", user.getUsername(),
+					ZoneImpl.this.getZoneName());
+			plugin.userDisconnect(user, reason);
+			Callable callback = userEvent.getCallback();
+			if (callback != null) {
+				callback.call(user);
+			}
 		}
 	}
 
@@ -103,14 +86,16 @@ public class ZoneImpl extends BaseLoggable implements Zone {
 	private RoomManager roomManager;
 	private UserManager userManager;
 	private SessionManager sessionManager;
-	private ZonePlugin zonePlugin;
+	private ZonePlugin plugin;
 	private MarioApi marioApi;
 	private PluginManager pluginManager;
 	private String extensionName;
-	private MGSScheduledService scheduledService;
 	private Map<String, PuValue> zoneVariables;
 	private JoinRoomCallback joinRoomCallback;
 	private JoinRoomNavigator joinRoomNavigator;
+	private RoomExecutor roomExecutor;
+	private ScheduledExecutorService scheduledService;
+	private DisruptorAsyncTaskExecutor executor;
 
 	private ZoneImpl() {
 		roomManager = new RoomManager();
@@ -123,7 +108,7 @@ public class ZoneImpl extends BaseLoggable implements Zone {
 	public ZoneImpl(String zoneName, ZonePlugin zonePlugin, MarioApi marioApi, SessionManager sessionManager) {
 		this();
 		this.zoneName = zoneName;
-		this.zonePlugin = zonePlugin;
+		this.plugin = zonePlugin;
 		this.marioApi = marioApi;
 		this.sessionManager = sessionManager;
 	}
@@ -182,53 +167,6 @@ public class ZoneImpl extends BaseLoggable implements Zone {
 	}
 
 	@Override
-	public String getZoneName() {
-		return this.zoneName;
-	}
-
-	@Override
-	public RoomManager getRoomManager() {
-		return this.roomManager;
-	}
-
-	@Override
-	public ZonePlugin getPlugin() {
-		return this.zonePlugin;
-	}
-
-	public ZonePlugin getZonePlugin() {
-		return zonePlugin;
-	}
-
-	public void setZonePlugin(ZonePlugin zonePlugin) {
-		this.zonePlugin = zonePlugin;
-	}
-
-	public void setZoneName(String zoneName) {
-		this.zoneName = zoneName;
-	}
-
-	public void setRoomManager(RoomManager roomManager) {
-		this.roomManager = roomManager;
-	}
-
-	public MarioApi getMarioApi() {
-		return marioApi;
-	}
-
-	public void setMarioApi(MarioApi marioApi) {
-		this.marioApi = marioApi;
-	}
-
-	public UserManager getUserManager() {
-		return userManager;
-	}
-
-	public void setUserManager(UserManager userManager) {
-		this.userManager = userManager;
-	}
-
-	@Override
 	public Room findRoomById(int roomId) {
 		return this.roomManager.findRoomById(roomId);
 	}
@@ -247,43 +185,34 @@ public class ZoneImpl extends BaseLoggable implements Zone {
 			this.scheduledService.shutdown();
 		}
 
+		if (this.roomExecutor != null) {
+			this.roomExecutor.shutdown();
+		}
+
+		if (scheduledService != null) {
+			scheduledService.shutdown();
+			try {
+				if (scheduledService.awaitTermination(3, TimeUnit.SECONDS)) {
+					scheduledService.shutdownNow();
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		if (this.executor != null) {
+			try {
+				this.executor.shutdown();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
 		try {
-			this.zonePlugin.destroy();
+			this.plugin.destroy();
 		} catch (Exception e) {
 			System.out.println("destroy zone plugin ex " + e);
 		}
-	}
-
-	public PluginManager getPluginManager() {
-		return pluginManager;
-	}
-
-	public void setPluginManager(PluginManager pluginManager) {
-		this.pluginManager = pluginManager;
-	}
-
-	public String getExtensionName() {
-		return extensionName;
-	}
-
-	public void setExtensionName(String extensionName) {
-		this.extensionName = extensionName;
-	}
-
-	public MGSScheduledService getScheduledService() {
-		return scheduledService;
-	}
-
-	public void setScheduledService(MGSScheduledService scheduledService) {
-		this.scheduledService = scheduledService;
-	}
-
-	public Map<String, PuValue> getZoneVariables() {
-		return zoneVariables;
-	}
-
-	public void setZoneVariables(Map<String, PuValue> zoneVariables) {
-		this.zoneVariables = zoneVariables;
 	}
 
 	@Override
@@ -291,24 +220,8 @@ public class ZoneImpl extends BaseLoggable implements Zone {
 		return zoneVariables.get(key);
 	}
 
-	public JoinRoomCallback getJoinRoomCallback() {
-		return joinRoomCallback;
-	}
-
-	public void setJoinRoomCallback(JoinRoomCallback joinRoomCallback) {
-		this.joinRoomCallback = joinRoomCallback;
-	}
-
 	@Override
 	public boolean variableExists(String key) {
 		return this.zoneVariables.containsKey(key);
-	}
-
-	public JoinRoomNavigator getJoinRoomNavigator() {
-		return joinRoomNavigator;
-	}
-
-	public void setJoinRoomNavigator(JoinRoomNavigator joinRoomNavigator) {
-		this.joinRoomNavigator = joinRoomNavigator;
 	}
 }

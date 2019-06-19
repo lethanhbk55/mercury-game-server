@@ -16,6 +16,7 @@ public class TestScheduledService {
 		workerPoolConfig.setPoolSize(8);
 		workerPoolConfig.setRingBufferSize(1024);
 		config.setWorkerPoolConfig(workerPoolConfig);
+		
 		MGSScheduledService service = new MGSScheduledService(config);
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			public void run() {
@@ -37,7 +38,7 @@ public class TestScheduledService {
 			@Override
 			public void call() {
 				future.cancel();
-				System.out.println("size " + service.size());
+				System.out.println("size " + MGSScheduledService.size());
 			}
 		});
 		

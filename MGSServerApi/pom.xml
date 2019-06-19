@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.mercury</groupId>
 	<artifactId>mgs-server-api</artifactId>
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 	<build>
 		<plugins>
 			<plugin>
@@ -43,19 +43,8 @@
 		<dependency>
 			<groupId>com.mario</groupId>
 			<artifactId>mario3</artifactId>
-			<version>1.0.2</version>
+			<version>1.0.7</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com-nhb</groupId>
-			<artifactId>nhb-common</artifactId>
-			<version>1.0.1</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.nhb</groupId>
-			<artifactId>nhb-common-messaging</artifactId>
-			<version>1.0.1</version>
 		</dependency>
 	</dependencies>
 

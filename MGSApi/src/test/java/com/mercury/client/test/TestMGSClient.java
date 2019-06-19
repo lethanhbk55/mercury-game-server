@@ -13,8 +13,8 @@ public class TestMGSClient extends BaseLoggable {
 
 	public static void main(String[] args) throws IOException {
 		System.out.println("Open connect to MiniGame Server");
-		final TestZoneMGSClient client = new TestZoneMGSClient("TestZone", TransportProtocol.TCP);
-		client.connect("localhost", 9922);
+		final BaseMGSClient client = new BaseMGSClient("Simms", TransportProtocol.TCP);
+		client.connect("LB-bogia-api-33867442.ap-southeast-1.elb.amazonaws.com", 9922);
 
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 

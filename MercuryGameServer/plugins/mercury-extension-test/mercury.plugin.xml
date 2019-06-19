@@ -9,6 +9,14 @@
 			<ringbuffersize>2048</ringbuffersize>
 			<threadnamepattern>Input Worker #%d</threadnamepattern>
 		</workerpool>
+		
+		<roomConfig>
+			<workerpool>
+				<poolsize>8</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>Room Worker #%d</threadnamepattern>
+			</workerpool>
+		</roomConfig>
 
 		<scheduler>
 			<counter>4</counter>

@@ -1,9 +1,14 @@
 package com.mercury.server.extension.loader;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import com.mario.config.WorkerPoolConfig;
 import com.mercury.server.api.PluginApiFactory;
 import com.mercury.server.callback.JoinRoomCallback;
+import com.mercury.server.entity.room.RoomExecutor;
 import com.mercury.server.entity.session.SessionManager;
 import com.mercury.server.entity.zone.ZoneImpl;
 import com.mercury.server.entity.zone.ZoneManager;
@@ -13,8 +18,8 @@ import com.mercury.server.navigator.JoinRoomNavigator;
 import com.mercury.server.plugin.PluginManager;
 import com.mercury.server.plugin.ZonePlugin;
 import com.mercury.server.processor.ProcessorManager;
-import com.mercury.server.schedule.MGSScheduledService;
 import com.nhb.common.BaseLoggable;
+import com.nhb.common.async.executor.DisruptorAsyncTaskExecutor;
 
 public class ExtensionInitializer extends BaseLoggable {
 
@@ -65,8 +70,28 @@ public class ExtensionInitializer extends BaseLoggable {
 				}
 
 				SchedulerConfig schedulerConfig = zoneConfig.getSchedulerConfig();
-				zone.setScheduledService(new MGSScheduledService(schedulerConfig));
+				WorkerPoolConfig workerPoolConfig = schedulerConfig.getWorkerPoolConfig();
+				zone.setExecutor(
+						DisruptorAsyncTaskExecutor.createSingleProducerExecutor(workerPoolConfig.getRingBufferSize(),
+								workerPoolConfig.getPoolSize(), workerPoolConfig.getThreadNamePattern()));
+				System.out.println("create zone executor " + zone.getExecutor());
+				zone.setScheduledService(
+						Executors.newScheduledThreadPool(schedulerConfig.getCounter(), new ThreadFactory() {
+							private AtomicInteger idSeed = new AtomicInteger(1);
+
+							@Override
+							public Thread newThread(Runnable runnale) {
+								return new Thread(runnale,
+										String.format("MGS Scheduler #%d", idSeed.getAndIncrement()));
+							}
+						}));
+				System.out.println("create zone scheduled service " + zone.getScheduledService());
+				zone.setRoomExecutor(new RoomExecutor(zoneConfig.getRoomConfig()));
+				System.out.println("create room executor" + zone.getRoomExecutor());
 				zonePlugin.init(zoneConfig.getInitParams());
+				
+				zone.getExecutor().start();
+				zone.getRoomExecutor().start();
 
 				PluginManager pluginManager = new PluginManager(extensionManager, pluginApiFactory, zone);
 				if (zone instanceof ZoneImpl) {

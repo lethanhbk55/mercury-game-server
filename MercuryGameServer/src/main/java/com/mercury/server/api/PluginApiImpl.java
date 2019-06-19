@@ -15,7 +15,6 @@ import com.mercury.server.entity.room.Room;
 import com.mercury.server.entity.user.User;
 import com.mercury.server.entity.user.UserManager;
 import com.mercury.server.entity.zone.Zone;
-import com.mercury.server.entity.zone.ZoneImpl;
 import com.mercury.server.entity.zone.ZoneManager;
 import com.mercury.server.event.reason.UserDisconnectReason;
 import com.mercury.server.event.reason.UserLeaveRoomReason;
@@ -24,7 +23,9 @@ import com.mercury.server.exception.data.ErrorCode;
 import com.mercury.server.extension.loader.ExtensionManager;
 import com.mercury.server.plugin.RoomPlugin;
 import com.mercury.server.response.impl.ExtensionResponse;
+import com.mercury.server.schedule.MGSScheduledService;
 import com.nhb.common.BaseLoggable;
+import com.nhb.common.async.executor.DisruptorAsyncTaskExecutor;
 import com.nhb.common.data.PuObject;
 import com.nhb.common.data.PuValue;
 
@@ -61,9 +62,8 @@ class PluginApiImpl extends BaseLoggable implements PluginApi {
 		room.setGroupId(setting.getGroupId());
 		room.setRoomVariables(setting.getRoomVariables());
 		room.setMessenger(new RoomMessengerImpl(factory.newMarioApi()));
-
 		roomPlugin.setPluginApi(this.factory.newRoomPluginApi(this.getZoneName(), room));
-		zone.getRoomManager().addRoom(room, setting);
+		zone.getRoomManager().addRoom(room, setting, zone.getRoomExecutor());
 	}
 
 	public void removeRoom(int roomId) {
@@ -207,20 +207,37 @@ class PluginApiImpl extends BaseLoggable implements PluginApi {
 
 	@Override
 	public ScheduledFuture schedule(int delay, int times, ScheduledCallback callback) {
-		ZoneImpl zoneImpl = (ZoneImpl) this.zone;
-		return zoneImpl.getScheduledService().schedule(delay, delay, times, callback);
+		DisruptorAsyncTaskExecutor executor;
+		if (this.room != null) {
+			executor = room.getExecutor();
+		} else {
+			executor = this.zone.getExecutor();
+		}
+		return new MGSScheduledService(this.zone.getScheduledService(), executor).schedule(delay, delay, times,
+				callback);
 	}
 
 	@Override
 	public ScheduledFuture schedule(int delay, int pediod, int times, ScheduledCallback callback) {
-		ZoneImpl zoneImpl = (ZoneImpl) this.zone;
-		return zoneImpl.getScheduledService().schedule(delay, pediod, times, callback);
+		DisruptorAsyncTaskExecutor executor;
+		if (this.room != null) {
+			executor = room.getExecutor();
+		} else {
+			executor = this.zone.getExecutor();
+		}
+		return new MGSScheduledService(this.zone.getScheduledService(), executor).schedule(delay, pediod, times,
+				callback);
 	}
 
 	@Override
 	public void execute(ScheduledCallback callback) {
-		ZoneImpl zoneImpl = (ZoneImpl) this.zone;
-		zoneImpl.getScheduledService().execute(callback);
+		DisruptorAsyncTaskExecutor executor;
+		if (this.room != null) {
+			executor = room.getExecutor();
+		} else {
+			executor = this.zone.getExecutor();
+		}
+		new MGSScheduledService(this.zone.getScheduledService(), executor).execute(callback);
 	}
 
 	@Override

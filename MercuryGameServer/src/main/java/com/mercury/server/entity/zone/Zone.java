@@ -1,15 +1,18 @@
 package com.mercury.server.entity.zone;
 
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 
 import com.mario.api.MarioApi;
 import com.mercury.server.callback.JoinRoomCallback;
 import com.mercury.server.entity.room.Room;
+import com.mercury.server.entity.room.RoomExecutor;
 import com.mercury.server.entity.room.RoomManager;
 import com.mercury.server.entity.user.UserManager;
 import com.mercury.server.navigator.JoinRoomNavigator;
 import com.mercury.server.plugin.PluginManager;
 import com.mercury.server.plugin.ZonePlugin;
+import com.nhb.common.async.executor.DisruptorAsyncTaskExecutor;
 import com.nhb.common.data.PuValue;
 
 public interface Zone {
@@ -41,4 +44,10 @@ public interface Zone {
 	JoinRoomNavigator getJoinRoomNavigator();
 
 	boolean variableExists(String key);
+
+	RoomExecutor getRoomExecutor();
+	
+	DisruptorAsyncTaskExecutor getExecutor();
+	
+	ScheduledExecutorService getScheduledService();
 }
