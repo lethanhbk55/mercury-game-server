@@ -90,7 +90,17 @@ class PluginApiImpl extends BaseLoggable implements PluginApi {
 	public void requestRoomPlugin(int roomId, User user, PuObject params) {
 		Room room = this.zone.findRoomById(roomId);
 		if (room != null) {
-			room.getRoomPlugin().request(user, params);
+			room.getExecutor().execute(new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+						room.getRoomPlugin().request(user, params);
+					} catch (Exception e) {
+						getLogger().error("request rooom plugin has exception", e);
+					}
+				}
+			});
 		}
 	}
 

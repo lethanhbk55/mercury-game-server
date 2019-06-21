@@ -50,7 +50,7 @@ public class Monitor extends BaseLoggable {
 					}
 				}
 
-				getLogger().info("Thread {}: CPU Time: {} ms, \nStacktrace:{}", info.getThreadName(), cpuTime / 1e6,
+				getLogger().debug("Thread {}: CPU Time: {} ms, \nStacktrace:{}", info.getThreadName(), cpuTime / 1e6,
 						stacktraceToString(elements));
 			}
 		}
