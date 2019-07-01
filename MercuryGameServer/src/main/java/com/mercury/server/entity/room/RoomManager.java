@@ -8,11 +8,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.mario.gateway.socket.SocketSession;
-import com.mario.schedule.ScheduledCallback;
 import com.mercury.server.api.setting.CreateRoomSetting;
 import com.mercury.server.callback.CreateRoomCallback;
 import com.mercury.server.callback.RemoveRoomCallback;
 import com.nhb.common.BaseLoggable;
+import com.nhb.common.async.executor.DisruptorAsyncTaskExecutor;
 import com.nhb.common.data.PuObject;
 import com.nhb.eventdriven.Event;
 import com.nhb.eventdriven.EventHandler;
@@ -33,10 +33,11 @@ public class RoomManager extends BaseLoggable {
 		idGenerator = new RoomIdGeneratorImpl();
 	}
 
-	public void addRoom(Room room, CreateRoomSetting setting) {
+	public void addRoom(Room room, CreateRoomSetting setting, RoomExecutor roomExecutor) {
 		int roomId = idGenerator.nextId();
 		if (room instanceof AbstractRoom) {
 			((AbstractRoom) room).setRoomId(roomId);
+			((AbstractRoom) room).setExecutor(roomExecutor.getExecutor(roomId));
 		}
 		rooms.put(roomId, room);
 
@@ -67,10 +68,13 @@ public class RoomManager extends BaseLoggable {
 
 		CreateRoomCallback callback = setting.getCreateRoomCallback();
 		if (callback != null) {
-			room.getRoomPlugin().getPluginApi().execute(new ScheduledCallback() {
+			DisruptorAsyncTaskExecutor executor = room.getExecutor();
+			System.out.println("execute callback on executor " + executor);
+			
+			executor.execute(new Runnable() {
 
 				@Override
-				public void call() {
+				public void run() {
 					try {
 						callback.call(room);
 					} catch (Exception e) {
@@ -117,10 +121,10 @@ public class RoomManager extends BaseLoggable {
 				((AbstractRoom) room).removeAllEventListener();
 				RemoveRoomCallback removeRoomCallback = ((AbstractRoom) room).getRemoveRoomCallback();
 				if (removeRoomCallback != null) {
-					room.getRoomPlugin().getPluginApi().execute(new ScheduledCallback() {
+					room.getExecutor().execute(new Runnable() {
 
 						@Override
-						public void call() {
+						public void run() {
 							try {
 								removeRoomCallback.call(room);
 							} catch (Exception e) {

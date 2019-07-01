@@ -9,12 +9,10 @@ public class MGSScheduledFuture implements ScheduledFuture {
 	private java.util.concurrent.ScheduledFuture<?> future;
 	private long startTime;
 	private boolean cancelled = false;
-	private MGSScheduledService service;
 
-	public MGSScheduledFuture(long id, MGSScheduledService service) {
+	public MGSScheduledFuture(long id) {
 		autoStartTime();
 		this.id = id;
-		this.service = service;
 	}
 
 	@Override
@@ -25,7 +23,7 @@ public class MGSScheduledFuture implements ScheduledFuture {
 	@Override
 	public void cancel() {
 		this.cancelled = true;
-		this.service.removeFuture(this.id);
+		MGSScheduledService.FutureIdMapping.remove(this.getId());
 		if (this.future != null) {
 			future.cancel(false);
 			future = null;

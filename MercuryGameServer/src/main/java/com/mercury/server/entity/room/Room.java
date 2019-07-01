@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.mercury.server.entity.user.User;
 import com.mercury.server.plugin.RoomPlugin;
+import com.nhb.common.async.executor.DisruptorAsyncTaskExecutor;
 import com.nhb.common.data.PuValue;
 
 public interface Room {
@@ -38,4 +39,6 @@ public interface Room {
 	String getGroupId();
 	
 	boolean isDestroy();
+	
+	DisruptorAsyncTaskExecutor getExecutor();
 }

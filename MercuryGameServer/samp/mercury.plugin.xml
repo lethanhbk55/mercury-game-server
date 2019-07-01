@@ -6,13 +6,21 @@
 		<handle>[handle class]</handle>
 		<joinRoomCallback>[join room callback class default null]</joinRoomCallback>
 		<joinRoomNavigator>[navigator class default null]</joinRoomNavigator>
+		
+		<roomConfig>
+			<workerpool>
+				<poolsize>8</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>Room Worker #%d</threadnamepattern>
+			</workerpool>
+		</roomConfig>
 
 		<scheduler>
 			<counter>4</counter>
 			<workerpool>
 				<poolsize>8</poolsize>
 				<ringbuffersize>2048</ringbuffersize>
-				<threadnamepattern>Scheduled Worker #%d</threadnamepattern>
+				<threadnamepattern>Zone Worker #%d</threadnamepattern>
 			</workerpool>
 		</scheduler>
 

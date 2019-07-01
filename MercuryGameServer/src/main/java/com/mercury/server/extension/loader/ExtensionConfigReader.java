@@ -14,6 +14,7 @@ import com.mario.config.ManagedObjectConfig;
 import com.mario.config.WorkerPoolConfig;
 import com.mario.extension.XmlConfigReader;
 import com.mercury.server.extension.config.PluginConfig;
+import com.mercury.server.extension.config.RoomConfig;
 import com.mercury.server.extension.config.SchedulerConfig;
 import com.mercury.server.extension.config.ZoneConfig;
 import com.nhb.common.data.PuObject;
@@ -51,15 +52,20 @@ final class ExtensionConfigReader extends XmlConfigReader {
 		String handle = ((Node) xPath.compile("handle").evaluate(node, XPathConstants.NODE)).getTextContent();
 		SchedulerConfig schedulerConfig = readSchedulerConfig(
 				(Node) xPath.compile("scheduler").evaluate(node, XPathConstants.NODE));
+		RoomConfig roomConfig = readRoomConfig((Node) xPath.compile("roomConfig").evaluate(node, XPathConstants.NODE));
 		Object variableObj = xPath.compile("variables").evaluate(node, XPathConstants.NODE);
 		Object joinRoomCallbackObj = xPath.compile("joinRoomCallback").evaluate(node, XPathConstants.NODE);
 		Object joinRoomNavigator = xPath.compile("joinRoomNavigator").evaluate(node, XPathConstants.NODE);
+		
+		System.out.println("room config " + roomConfig);
+		System.out.println("scheduler config " + schedulerConfig);
 
 		this.zoneConfig = new ZoneConfig();
 		this.zoneConfig.setName(zoneName);
 		this.zoneConfig.setExtensionName(pluginName);
 		this.zoneConfig.setHandleClass(handle);
 		this.zoneConfig.setSchedulerConfig(schedulerConfig);
+		this.zoneConfig.setRoomConfig(roomConfig);
 
 		if (variableObj != null) {
 			this.zoneConfig.setInitParams(PuObject.fromXML((Node) variableObj));
@@ -72,6 +78,15 @@ final class ExtensionConfigReader extends XmlConfigReader {
 		if (joinRoomNavigator != null) {
 			this.zoneConfig.setJoinRoomNavigatorClass(((Node) joinRoomNavigator).getTextContent());
 		}
+	}
+
+	private RoomConfig readRoomConfig(Node node) throws XPathExpressionException {
+		RoomConfig roomConfig = new RoomConfig();
+		if (node != null) {
+			roomConfig.setWorkerPoolConfig(
+					readWorkerPoolConfig(((Node) xPath.compile("workerpool").evaluate(node, XPathConstants.NODE))));
+		}
+		return roomConfig;
 	}
 
 	private SchedulerConfig readSchedulerConfig(Node node) throws XPathExpressionException {

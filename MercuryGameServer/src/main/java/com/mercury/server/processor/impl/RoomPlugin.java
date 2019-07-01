@@ -40,11 +40,17 @@ public class RoomPlugin extends MGSAbstractProcessor {
 			throw new ProcessMessageException("request room doesn't exit");
 		}
 
-		try {
-			room.getRoomPlugin().request(user, request.getParams());
-		} catch (Exception e) {
-			getLogger().error("room plugin request has exception", e);
-		}
+		zone.getRoomExecutor().execute(room.getRoomId(), new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					room.getRoomPlugin().request(user, request.getParams());
+				} catch (Exception e) {
+					getLogger().error("room plugin request has exception", e);
+				}
+			}
+		});
 		return null;
 	}
 
