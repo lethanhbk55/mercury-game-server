@@ -5,5 +5,5 @@ import com.mercury.server.plugin.Pluggable;
 
 public interface JoinRoomNavigator extends Pluggable {
 
-	int navigate(User user, int roomId);
+	int navigate(User user, int roomId, String password);
 }

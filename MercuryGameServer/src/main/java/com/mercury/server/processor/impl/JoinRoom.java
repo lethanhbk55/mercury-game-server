@@ -29,14 +29,15 @@ public class JoinRoom extends MGSAbstractProcessor {
 		}
 
 		int roomId = request.getRoomId();
+		String password = request.getPassword();
 
 		User user = zone.getUserManager().getBySessionId(sessionId);
 		if (user == null) {
 			throw new ProcessMessageException("User not join to zone but want to join room, sessionId: " + sessionId);
 		}
-		
+
 		if (zone.getJoinRoomNavigator() != null) {
-			roomId = zone.getJoinRoomNavigator().navigate(user, roomId);
+			roomId = zone.getJoinRoomNavigator().navigate(user, roomId, password);
 		}
 
 		Room room = zone.getRoomManager().findRoomById(roomId);
@@ -49,27 +50,26 @@ public class JoinRoom extends MGSAbstractProcessor {
 			return response;
 		}
 
-
-		if (room.hasPassword()) {
-			String password = request.getPassword();
-			if (!password.equals(room.getPassword())) {
-				JoinRoomResponse response = new JoinRoomResponse();
-				response.setRoomId(room.getRoomId());
-				response.setSuccess(false);
-				response.setErrorCode(RoomError.WRONG_PASSWORD.getCode());
-				response.setMessage(RoomError.WRONG_PASSWORD.getMessage());
-				if (zone.getJoinRoomCallback() != null) {
-					try {
-						zone.getJoinRoomCallback().call(user, request.getRoomId(), RoomError.WRONG_PASSWORD);
-					} catch (Exception e) {
-						getLogger().error("join room callback has exception", e);
-					}
+		if ((room.hasPassword() && !room.getPassword().equals(password))
+				|| (!room.hasPassword() && password != null && !password.isEmpty())) {
+			JoinRoomResponse response = new JoinRoomResponse();
+			response.setRoomId(room.getRoomId());
+			response.setSuccess(false);
+			response.setErrorCode(RoomError.WRONG_PASSWORD.getCode());
+			response.setMessage(RoomError.WRONG_PASSWORD.getMessage());
+			if (zone.getJoinRoomCallback() != null) {
+				try {
+					zone.getJoinRoomCallback().call(user, request.getRoomId(), RoomError.WRONG_PASSWORD);
+				} catch (Exception e) {
+					getLogger().error("join room callback has exception", e);
 				}
-				return response;
 			}
+			return response;
 		}
 
-		try {
+		try
+
+		{
 			if (user.getLastJoinedRoom() != null && user.getLastJoinedRoom() != room) {
 				AbstractRoom lastJoinedRoom = (AbstractRoom) user.getLastJoinedRoom();
 				lastJoinedRoom.leaveRoom(user, UserLeaveRoomReason.KICKED, null);
