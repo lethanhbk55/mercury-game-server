@@ -44,6 +44,9 @@ public class ZoneImpl extends BaseLoggable implements Zone {
 		public void onEvent(Event event) throws Exception {
 			UserEvent userEvent = (UserEvent) event;
 			User user = userEvent.getUser();
+			if (user == null) {
+				return;
+			}
 			getLogger().info("User {} loggged in and join to zone {}", user.getUsername(), ZoneImpl.this.getZoneName());
 			sessionManager.addSessionToZone(user.getSessionId(), ZoneImpl.this);
 			sendLoginSuccess(user);
@@ -55,34 +58,33 @@ public class ZoneImpl extends BaseLoggable implements Zone {
 
 		@Override
 		public void onEvent(Event event) throws Exception {
-			try {
-				UserEvent userEvent = (UserEvent) event;
-				User user = userEvent.getUser();
-				UserDisconnectReason reason = userEvent.getReason();
-				sessionManager.removeSession(user.getSessionId());
+			UserEvent userEvent = (UserEvent) event;
+			User user = userEvent.getUser();
+			if (user == null) {
+				return;
+			}
 
-				getLogger().debug("remove user success {}", user.getUsername());
-				Room lastJoinedRoom = user.getLastJoinedRoom();
-				if (lastJoinedRoom != null && lastJoinedRoom instanceof AbstractRoom) {
-					UserLeaveRoomReason leaveRoomReason = reason == UserDisconnectReason.KICKED
-							? UserLeaveRoomReason.KICKED
-							: UserLeaveRoomReason.LEAVE_ROOM;
-					try {
-						((AbstractRoom) lastJoinedRoom).leaveRoom(user, leaveRoomReason, null);
-					} catch (MGSException e) {
-						getLogger().warn("user {} disconnect to leave room", user.getUsername());
-					}
+			UserDisconnectReason reason = userEvent.getReason();
+			sessionManager.removeSession(user.getSessionId());
+
+			getLogger().debug("remove user success {}", user.getUsername());
+			Room lastJoinedRoom = user.getLastJoinedRoom();
+			if (lastJoinedRoom != null && lastJoinedRoom instanceof AbstractRoom) {
+				UserLeaveRoomReason leaveRoomReason = reason == UserDisconnectReason.KICKED ? UserLeaveRoomReason.KICKED
+						: UserLeaveRoomReason.LEAVE_ROOM;
+				try {
+					((AbstractRoom) lastJoinedRoom).leaveRoom(user, leaveRoomReason, null);
+				} catch (MGSException e) {
+					getLogger().warn("user {} disconnect to leave room", user.getUsername());
 				}
-				sendLogoutSucess(user, reason);
-				getLogger().info("[DISCONNECT] user {} disconnected from zone {}", user.getUsername(),
-						ZoneImpl.this.getZoneName());
-				plugin.userDisconnect(user, reason);
-				Callable callback = userEvent.getCallback();
-				if (callback != null) {
-					callback.call(user);
-				}
-			} catch (Exception e) {
-				getLogger().error("remove user has exception", e);
+			}
+			sendLogoutSucess(user, reason);
+			getLogger().info("[DISCONNECT] user {} disconnected from zone {}", user.getUsername(),
+					ZoneImpl.this.getZoneName());
+			plugin.userDisconnect(user, reason);
+			Callable callback = userEvent.getCallback();
+			if (callback != null) {
+				callback.call(user);
 			}
 		}
 	}

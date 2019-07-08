@@ -13,12 +13,12 @@ public class MGSException extends Throwable {
 	}
 
 	public MGSException(ErrorCode errorCode) {
-		this();
+		super(errorCode.toString());
 		setErrorCode(errorCode);
 	}
 
 	public MGSException(ErrorCode errorCode, Throwable e) {
-		super(e);
+		super(errorCode.toString(), e);
 		setErrorCode(errorCode);
 	}
 
