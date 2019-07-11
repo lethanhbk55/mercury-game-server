@@ -3,10 +3,10 @@ package com.mercury.server.entity.room;
 import java.util.Map;
 import java.util.Set;
 
+import com.mercury.server.callback.JoinRoomCallback;
 import com.mercury.server.callback.RemoveRoomCallback;
 import com.mercury.server.entity.user.User;
 import com.mercury.server.event.reason.UserLeaveRoomReason;
-import com.mercury.server.exception.MGSException;
 import com.mercury.server.exception.data.ErrorCode;
 import com.mercury.server.plugin.RoomPlugin;
 import com.nhb.common.async.executor.DisruptorAsyncTaskExecutor;
@@ -37,9 +37,9 @@ public abstract class AbstractRoom extends BaseEventDispatcher implements Room {
 	private boolean isDestroy;
 	private DisruptorAsyncTaskExecutor executor;
 
-	public abstract void joinRoom(User user) throws MGSException;
+	public abstract void joinRoom(User user, JoinRoomCallback joinRoomCallback);
 
-	public abstract void leaveRoom(User user, UserLeaveRoomReason reason, ErrorCode code) throws MGSException;
+	public abstract void leaveRoom(User user, UserLeaveRoomReason reason, ErrorCode code);
 
 	public boolean hasPassword() {
 		return hasPassword;

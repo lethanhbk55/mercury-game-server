@@ -6,7 +6,6 @@ import com.mercury.server.entity.room.Room;
 import com.mercury.server.entity.user.User;
 import com.mercury.server.entity.zone.Zone;
 import com.mercury.server.event.reason.UserLeaveRoomReason;
-import com.mercury.server.exception.MGSException;
 import com.mercury.server.exception.ProcessMessageException;
 import com.mercury.server.exception.data.RoomError;
 import com.mercury.server.message.MGSMessage;
@@ -67,32 +66,15 @@ public class JoinRoom extends MGSAbstractProcessor {
 			return response;
 		}
 
-		try
-
-		{
+		try {
 			if (user.getLastJoinedRoom() != null && user.getLastJoinedRoom() != room) {
 				AbstractRoom lastJoinedRoom = (AbstractRoom) user.getLastJoinedRoom();
 				lastJoinedRoom.leaveRoom(user, UserLeaveRoomReason.KICKED, null);
 			}
 
 			if (room instanceof AbstractRoom) {
-				((AbstractRoom) room).joinRoom(user);
+				((AbstractRoom) room).joinRoom(user, zone.getJoinRoomCallback());
 			}
-		} catch (MGSException e) {
-			getLogger().warn("user join room get error {}", e.getErrorCode());
-			JoinRoomResponse response = new JoinRoomResponse();
-			response.setRoomId(request.getRoomId());
-			response.setSuccess(false);
-			response.setErrorCode(e.getErrorCode().getCode());
-			response.setMessage(e.getErrorCode().getMessage());
-			if (zone.getJoinRoomCallback() != null) {
-				try {
-					zone.getJoinRoomCallback().call(user, request.getRoomId(), e.getErrorCode());
-				} catch (Exception e1) {
-					getLogger().error("join room callback has exception", e1);
-				}
-			}
-			return response;
 		} catch (Exception e) {
 			throw new RuntimeException("user join room error", e);
 		}

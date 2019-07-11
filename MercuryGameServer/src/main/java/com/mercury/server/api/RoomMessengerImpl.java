@@ -2,6 +2,7 @@ package com.mercury.server.api;
 
 import com.mario.api.MarioApi;
 import com.mario.gateway.socket.SocketSession;
+import com.mercury.server.callback.JoinRoomCallback;
 import com.mercury.server.entity.room.RoomMessenger;
 import com.mercury.server.entity.user.User;
 import com.mercury.server.event.reason.UserLeaveRoomReason;
@@ -55,6 +56,42 @@ class RoomMessengerImpl extends BaseLoggable implements RoomMessenger {
 		} else {
 			getLogger().warn("send leave room was not success because socket session for user {} not found",
 					user.getUsername());
+		}
+	}
+
+	@Override
+	public void sendJoinRoomFail(User user, int roomId, ErrorCode errorCode, JoinRoomCallback callback) {
+		JoinRoomResponse response = new JoinRoomResponse();
+		response.setRoomId(roomId);
+		response.setSuccess(false);
+		response.setErrorCode(errorCode.getCode());
+		response.setMessage(errorCode.getMessage());
+		if (callback != null) {
+			try {
+				callback.call(user, roomId, errorCode);
+			} catch (Exception e1) {
+				getLogger().error("join room callback has exception", e1);
+			}
+		}
+		SocketSession socketSession = this.marioApi.getSocketSession(user.getSessionId());
+		if (socketSession != null) {
+			socketSession.send(response.serialize());
+		}
+	}
+
+	@Override
+	public void sendLeaveRoomFail(User user, int roomId, ErrorCode errorCode) {
+		LeaveRoomResponse response = new LeaveRoomResponse();
+		response.setReason(UserLeaveRoomReason.LEAVE_ROOM);
+		response.setSuccess(false);
+		if (errorCode != null) {
+			response.setErrorCode(errorCode.getCode());
+			response.setMessage(errorCode.getMessage());
+		}
+		response.setRoomId(roomId);
+		SocketSession socketSession = this.marioApi.getSocketSession(user.getSessionId());
+		if (socketSession != null) {
+			socketSession.send(response.serialize());
 		}
 	}
 

@@ -18,7 +18,6 @@ import com.mercury.server.entity.zone.Zone;
 import com.mercury.server.entity.zone.ZoneManager;
 import com.mercury.server.event.reason.UserDisconnectReason;
 import com.mercury.server.event.reason.UserLeaveRoomReason;
-import com.mercury.server.exception.MGSException;
 import com.mercury.server.exception.data.ErrorCode;
 import com.mercury.server.extension.loader.ExtensionManager;
 import com.mercury.server.plugin.RoomPlugin;
@@ -188,7 +187,7 @@ class PluginApiImpl extends BaseLoggable implements PluginApi {
 		if (room != null && user != null) {
 			try {
 				((AbstractRoom) room).leaveRoom(user, UserLeaveRoomReason.KICKED, code);
-			} catch (MGSException e) {
+			} catch (Exception e) {
 				getLogger().debug("kick user {} get error", username, e);
 			}
 			return true;

@@ -6,7 +6,6 @@ import com.mercury.server.entity.room.Room;
 import com.mercury.server.entity.user.User;
 import com.mercury.server.entity.zone.Zone;
 import com.mercury.server.event.reason.UserLeaveRoomReason;
-import com.mercury.server.exception.MGSException;
 import com.mercury.server.exception.ProcessMessageException;
 import com.mercury.server.exception.data.RoomError;
 import com.mercury.server.message.MGSMessage;
@@ -44,19 +43,8 @@ public class LeaveRoom extends MGSAbstractProcessor {
 		if (room instanceof AbstractRoom) {
 			try {
 				((AbstractRoom) room).leaveRoom(user, UserLeaveRoomReason.LEAVE_ROOM, null);
-			} catch (MGSException e) {
-				getLogger().error("user leave room get error", e);
-				LeaveRoomResponse response = new LeaveRoomResponse();
-				response.setReason(UserLeaveRoomReason.LEAVE_ROOM);
-				response.setSuccess(false);
-				if (e.getErrorCode() != null) {
-					response.setErrorCode(e.getErrorCode().getCode());
-					response.setMessage(e.getErrorCode().getMessage());
-				}
-				response.setRoomId(request.getRoomId());
-				return response;
 			} catch (Exception e) {
-				throw new RuntimeException("user leave room error", e);
+				getLogger().error("user leave room error", e);
 			}
 		}
 

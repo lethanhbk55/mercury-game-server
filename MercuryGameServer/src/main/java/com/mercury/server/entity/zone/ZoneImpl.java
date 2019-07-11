@@ -18,7 +18,6 @@ import com.mercury.server.entity.user.UserEvent;
 import com.mercury.server.entity.user.UserManager;
 import com.mercury.server.event.reason.UserDisconnectReason;
 import com.mercury.server.event.reason.UserLeaveRoomReason;
-import com.mercury.server.exception.MGSException;
 import com.mercury.server.navigator.JoinRoomNavigator;
 import com.mercury.server.plugin.PluginManager;
 import com.mercury.server.plugin.ZonePlugin;
@@ -74,8 +73,8 @@ public class ZoneImpl extends BaseLoggable implements Zone {
 						: UserLeaveRoomReason.LEAVE_ROOM;
 				try {
 					((AbstractRoom) lastJoinedRoom).leaveRoom(user, leaveRoomReason, null);
-				} catch (MGSException e) {
-					getLogger().warn("user {} disconnect to leave room", user.getUsername());
+				} catch (Exception e) {
+					getLogger().error("user {} disconnect to leave room", user.getUsername());
 				}
 			}
 			sendLogoutSucess(user, reason);

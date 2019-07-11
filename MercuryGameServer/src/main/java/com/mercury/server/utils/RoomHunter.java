@@ -15,7 +15,6 @@ import com.mercury.server.entity.user.User;
 import com.mercury.server.entity.zone.Zone;
 import com.mercury.server.entity.zone.ZoneManager;
 import com.mercury.server.event.reason.UserLeaveRoomReason;
-import com.mercury.server.exception.MGSException;
 import com.mercury.server.exception.data.RoomError;
 import com.nhb.common.BaseLoggable;
 
@@ -58,7 +57,7 @@ public class RoomHunter extends BaseLoggable {
 							try {
 								((AbstractRoom) room).leaveRoom(user, UserLeaveRoomReason.KICKED,
 										RoomError.USER_DISCONNECT);
-							} catch (MGSException e) {
+							} catch (Exception e) {
 								getLogger().warn("user {} disconnect to leave room", user.getUsername());
 							}
 						}
