@@ -30,9 +30,6 @@ class RoomMessengerImpl extends BaseLoggable implements RoomMessenger {
 			} catch (Exception e) {
 				getLogger().warn("send join room was not success for user {}", user.getUsername(), e);
 			}
-		} else {
-			getLogger().warn("send join room was not success because socket session for user {} not found",
-					user.getUsername());
 		}
 	}
 
@@ -53,9 +50,6 @@ class RoomMessengerImpl extends BaseLoggable implements RoomMessenger {
 			} catch (Exception e) {
 				getLogger().error("error while send leave room response for user: {}", user.getUsername(), e);
 			}
-		} else {
-			getLogger().warn("send leave room was not success because socket session for user {} not found",
-					user.getUsername());
 		}
 	}
 
@@ -75,7 +69,11 @@ class RoomMessengerImpl extends BaseLoggable implements RoomMessenger {
 		}
 		SocketSession socketSession = this.marioApi.getSocketSession(user.getSessionId());
 		if (socketSession != null) {
-			socketSession.send(response.serialize());
+			try {
+				socketSession.send(response.serialize());
+			} catch (Exception e) {
+				getLogger().error("error while send join room fail", e);
+			}
 		}
 	}
 
@@ -91,7 +89,11 @@ class RoomMessengerImpl extends BaseLoggable implements RoomMessenger {
 		response.setRoomId(roomId);
 		SocketSession socketSession = this.marioApi.getSocketSession(user.getSessionId());
 		if (socketSession != null) {
-			socketSession.send(response.serialize());
+			try {
+				socketSession.send(response.serialize());
+			} catch (Exception e) {
+				getLogger().error("error while send leave room fail", e);
+			}
 		}
 	}
 

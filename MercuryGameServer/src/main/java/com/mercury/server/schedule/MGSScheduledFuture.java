@@ -3,8 +3,9 @@ package com.mercury.server.schedule;
 import java.util.concurrent.TimeUnit;
 
 import com.mario.schedule.ScheduledFuture;
+import com.nhb.common.BaseLoggable;
 
-public class MGSScheduledFuture implements ScheduledFuture {
+public class MGSScheduledFuture extends BaseLoggable implements ScheduledFuture {
 	private long id;
 	private java.util.concurrent.ScheduledFuture<?> future;
 	private long startTime;
@@ -25,6 +26,7 @@ public class MGSScheduledFuture implements ScheduledFuture {
 		this.cancelled = true;
 		MGSScheduledService.FutureIdMapping.remove(this.getId());
 		if (this.future != null) {
+			getLogger().debug("[schedule] cancel schedule {}", getId());
 			future.cancel(false);
 			future = null;
 		}

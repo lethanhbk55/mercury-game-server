@@ -70,7 +70,7 @@ public class RoomManager extends BaseLoggable {
 		if (callback != null) {
 			DisruptorAsyncTaskExecutor executor = room.getExecutor();
 			System.out.println("execute callback on executor " + executor);
-			
+
 			executor.execute(new Runnable() {
 
 				@Override
@@ -95,14 +95,9 @@ public class RoomManager extends BaseLoggable {
 	}
 
 	private void removeRoom(Room room) {
-
-		synchronized (room) {
-			if (room.getUsers().size() == 0) {
-
-				if (room instanceof AbstractRoom) {
-					((AbstractRoom) room).setDestroy(true);
-				}
-
+		if (room.getUsers().size() == 0) {
+			if (room instanceof AbstractRoom) {
+				((AbstractRoom) room).setDestroy(true);
 			}
 		}
 
