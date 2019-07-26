@@ -91,6 +91,8 @@ public interface PluginApi {
 
 	void setRoomPassword(String password);
 	
+	void setRoomPassword(int roomId, String password);
+	
 	String getRoomPassword();
 	
 	boolean checkRoomHasPassword();

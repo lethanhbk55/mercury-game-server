@@ -59,10 +59,10 @@ class RoomImpl extends AbstractRoom implements Room {
 					try {
 						getMessenger().sendLeaveRoomFail(user, getRoomId(), e.getErrorCode());
 					} catch (Exception e1) {
-						getLogger().error("send leave room fail has exception", e);
+						getLogger().error("send leave room fail has exception", e1);
 					}
 				} catch (Exception e) {
-					getLogger().error("user leave roome error", e);
+					getLogger().error("user leave room error", e);
 				}
 			}
 		});

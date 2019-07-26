@@ -379,6 +379,15 @@ class PluginApiImpl extends BaseLoggable implements PluginApi {
 		}
 	}
 
+	@Override
+	public void setRoomPassword(int roomId, String password) {
+		Room room = findByRoomId(roomId);
+		if (room != null && room instanceof RoomImpl) {
+			((RoomImpl) room).setPassword(password);
+			((RoomImpl) room).setHasPassword(password == null || !password.isEmpty());
+		}
+	}
+
 	public boolean checkRoomHasPassword() {
 		if (this.room != null) {
 			return this.room.hasPassword();
