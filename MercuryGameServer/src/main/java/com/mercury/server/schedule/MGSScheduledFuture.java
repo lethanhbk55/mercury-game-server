@@ -1,19 +1,33 @@
 package com.mercury.server.schedule;
 
-import java.util.concurrent.TimeUnit;
-
 import com.mario.schedule.ScheduledFuture;
 import com.nhb.common.BaseLoggable;
 
 public class MGSScheduledFuture extends BaseLoggable implements ScheduledFuture {
-	private long id;
+	private static long idSeed = 0;
+
 	private java.util.concurrent.ScheduledFuture<?> future;
-	private long startTime;
+	private long delay;
 	private boolean cancelled = false;
 
-	public MGSScheduledFuture(long id) {
-		autoStartTime();
-		this.id = id;
+	private static long getNextId() {
+		return ++idSeed;
+	};
+
+	private long startTimeMillis;
+	private long id = getNextId();
+
+	public MGSScheduledFuture(long delay, java.util.concurrent.ScheduledFuture<?> future) {
+		this.delay = delay;
+		this.future = future;
+	}
+
+	public MGSScheduledFuture(long delay) {
+		this.delay = delay;
+	}
+
+	void updateStartTime() {
+		this.startTimeMillis = System.currentTimeMillis();
 	}
 
 	@Override
@@ -24,36 +38,31 @@ public class MGSScheduledFuture extends BaseLoggable implements ScheduledFuture 
 	@Override
 	public void cancel() {
 		this.cancelled = true;
-		MGSScheduledService.FutureIdMapping.remove(this.getId());
-		if (this.future != null) {
-			getLogger().debug("[schedule] cancel schedule {}", getId());
-			future.cancel(false);
-			future = null;
+		if (future != null) {
+			this.future.cancel(true);
+			this.future = null;
 		}
 	}
 
 	@Override
 	public long getRemainingTimeToNextOccurrence() {
-		if (this.future != null) {
-			return future.getDelay(TimeUnit.MILLISECONDS);
-		}
-		return 0;
+		return this.delay - (System.currentTimeMillis() - this.startTimeMillis);
 	}
 
 	@Override
 	public long getStartTime() {
-		return this.startTime;
-	}
-
-	public void autoStartTime() {
-		this.startTime = System.currentTimeMillis();
-	}
-
-	public void setFuture(java.util.concurrent.ScheduledFuture<?> future) {
-		this.future = future;
+		return this.startTimeMillis;
 	}
 
 	public boolean isCancelled() {
 		return this.cancelled;
+	}
+
+	void setFuture(java.util.concurrent.ScheduledFuture<?> future) {
+		this.future = future;
+	}
+
+	void setDelay(long delay) {
+		this.delay = delay;
 	}
 }

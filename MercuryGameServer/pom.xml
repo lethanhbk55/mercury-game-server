@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.mercury</groupId>
 	<artifactId>mercury-game-server</artifactId>
-	<version>2.0.2</version>
+	<version>2.0.4</version>
 	<name>MercuryGameServer</name>
 	<properties>
 		<extension.name>${project.name}</extension.name>
@@ -99,7 +99,7 @@
 		<dependency>
 			<groupId>com.mario</groupId>
 			<artifactId>mario3</artifactId>
-			<version>1.0.7</version>
+			<version>1.1.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

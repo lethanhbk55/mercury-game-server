@@ -1,7 +1,5 @@
 package com.mercury.server.schedule;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -19,9 +17,6 @@ import lombok.Setter;
 
 @Setter
 public class MGSScheduledService extends BaseLoggable {
-	public static final Map<Long, ScheduledFuture> FutureIdMapping = new ConcurrentHashMap<>();
-	private static final AtomicInteger idSeed = new AtomicInteger();
-
 	private ScheduledExecutorService scheduledService;
 	private DisruptorAsyncTaskExecutor executor;
 
@@ -42,6 +37,8 @@ public class MGSScheduledService extends BaseLoggable {
 				return new Thread(runnale, String.format("MGS Scheduler #%d", idSeed.getAndIncrement()));
 			}
 		}));
+
+		this.executor.start();
 	}
 
 	public void execute(ScheduledCallback callback) {
@@ -59,39 +56,47 @@ public class MGSScheduledService extends BaseLoggable {
 	}
 
 	public ScheduledFuture schedule(int delay, int period, int times, ScheduledCallback callback) {
-		MGSScheduledFuture scheduledFuture = new MGSScheduledFuture(idSeed.incrementAndGet());
-		java.util.concurrent.ScheduledFuture<?> future = this.scheduledService.scheduleAtFixedRate(new Runnable() {
-			int count = 0;
+		MGSScheduledFuture result = new MGSScheduledFuture(delay);
+		result.setFuture(this.scheduledService.scheduleAtFixedRate(new Runnable() {
+
+			private AtomicInteger count = new AtomicInteger();;
 
 			@Override
 			public void run() {
-				if (count >= times) {
-					ScheduledFuture future = FutureIdMapping.remove(scheduledFuture.getId());
-					future.cancel();
+				if (result.isCancelled()) {
 					return;
 				}
-				execute(callback);
-				count++;
-			}
-		}, delay, period, TimeUnit.MILLISECONDS);
 
-		scheduledFuture.setFuture(future);
-		FutureIdMapping.put(scheduledFuture.getId(), scheduledFuture);
-		return scheduledFuture;
+				execute(callback);
+				result.setDelay(delay);
+				result.updateStartTime();
+
+				if (count.incrementAndGet() == times) {
+					result.cancel();
+				}
+			}
+		}, delay, period, TimeUnit.MILLISECONDS));
+		result.updateStartTime();
+		return result;
 	}
 
 	public ScheduledFuture schedule(int delay, int period, ScheduledCallback callback) {
-		MGSScheduledFuture scheduledFuture = new MGSScheduledFuture(idSeed.incrementAndGet());
-		java.util.concurrent.ScheduledFuture<?> future = this.scheduledService.scheduleAtFixedRate(new Runnable() {
+		MGSScheduledFuture result = new MGSScheduledFuture(delay);
+		result.setFuture(this.scheduledService.scheduleAtFixedRate(new Runnable() {
 
 			@Override
 			public void run() {
-				execute(callback);
-			}
-		}, delay, period, TimeUnit.MILLISECONDS);
+				if (result.isCancelled()) {
+					return;
+				}
 
-		scheduledFuture.setFuture(future);
-		return scheduledFuture;
+				execute(callback);
+				result.setDelay(delay);
+				result.updateStartTime();
+			}
+		}, delay, period, TimeUnit.MILLISECONDS));
+		result.updateStartTime();
+		return result;
 	}
 
 	public void shutdown() {
@@ -113,13 +118,5 @@ public class MGSScheduledService extends BaseLoggable {
 				e.printStackTrace();
 			}
 		}
-	}
-
-	public static void removeFuture(long id) {
-		FutureIdMapping.remove(id);
-	}
-
-	public static int size() {
-		return FutureIdMapping.size();
 	}
 }
