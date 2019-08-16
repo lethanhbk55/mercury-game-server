@@ -27,7 +27,7 @@ public final class CCULog extends BaseLoggable {
 			public void call() {
 				int userCount = zoneManager.getUserCount();
 				int roomCount = zoneManager.getRoomCount();
-				getLogger().debug("======>CCUs: {}, Sessions: {}, Room: {}", userCount, sessionManager.size(),
+				getLogger().info("======>CCUs: {}, Sessions: {}, Room: {}", userCount, sessionManager.size(),
 						roomCount);
 			}
 		});

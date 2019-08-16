@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.mercury</groupId>
 	<artifactId>mercury-game-server</artifactId>
-	<version>2.0.4</version>
+	<version>2.0.5</version>
 	<name>MercuryGameServer</name>
 	<properties>
 		<extension.name>${project.name}</extension.name>

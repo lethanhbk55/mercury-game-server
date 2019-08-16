@@ -2,13 +2,10 @@ package com.mercury.server.utils;
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 
 import com.mario.api.MarioApi;
 import com.mario.gateway.socket.SocketSession;
+import com.mario.schedule.ScheduledCallback;
 import com.mercury.server.entity.session.PingSessionManager;
 import com.mercury.server.entity.session.SessionManager;
 import com.mercury.server.entity.user.User;
@@ -18,7 +15,6 @@ import com.mercury.server.event.reason.UserDisconnectReason;
 import com.nhb.common.BaseLoggable;
 
 public class GhostHunter extends BaseLoggable {
-	private ScheduledExecutorService service;
 	private PingSessionManager pingSessionManager;
 	private SessionManager sessionManager;
 	private ZoneManager zoneManager;
@@ -31,27 +27,22 @@ public class GhostHunter extends BaseLoggable {
 		this.sessionManager = sessionManager;
 		this.api = api;
 		this.zoneManager = zoneMaanger;
-		service = Executors.newScheduledThreadPool(1, new ThreadFactory() {
-
-			@Override
-			public Thread newThread(Runnable r) {
-				return new Thread(r, "Ghost Hunter");
-			}
-		});
 		this.timeForPing = timeForPing;
 	}
 
 	public void start() {
-		service.scheduleAtFixedRate(new Runnable() {
+		this.api.getScheduler().scheduleAtFixedRate(timeForPing * 1000, timeForPing * 1000, new ScheduledCallback() {
 
 			@Override
-			public void run() {
+			public void call() {
 				killSessionTimeout();
 			}
-		}, timeForPing, timeForPing, TimeUnit.SECONDS);
+		});
 	}
 
 	private void killSessionTimeout() {
+		long startTime = System.currentTimeMillis();
+
 		Set<String> sessionToKill = pingSessionManager.getSessionTimeout(timeForPing * 1000);
 
 		for (String sessionId : sessionToKill) {
@@ -87,16 +78,11 @@ public class GhostHunter extends BaseLoggable {
 				}
 			}
 		}
+
+		getLogger().info("kill session timeout {} sessions, time {} ms", sessionToKill.size(),
+				System.currentTimeMillis() - startTime);
 	}
 
 	public void stop() {
-		this.service.shutdown();
-		try {
-			if (this.service.awaitTermination(3, TimeUnit.SECONDS)) {
-				this.service.shutdownNow();
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 }

@@ -1,13 +1,10 @@
 package com.mercury.server.utils;
 
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 
 import com.mario.api.MarioApi;
 import com.mario.gateway.socket.SocketSession;
+import com.mario.schedule.ScheduledCallback;
 import com.mercury.server.entity.room.AbstractRoom;
 import com.mercury.server.entity.room.Room;
 import com.mercury.server.entity.room.RoomManager;
@@ -21,28 +18,20 @@ import com.nhb.common.BaseLoggable;
 public class RoomHunter extends BaseLoggable {
 	private ZoneManager zoneManager;
 	private MarioApi marioApi;
-	private ScheduledExecutorService service;
 
 	public RoomHunter(ZoneManager zoneManager, MarioApi marioApi) {
 		this.zoneManager = zoneManager;
 		this.marioApi = marioApi;
-		service = Executors.newScheduledThreadPool(1, new ThreadFactory() {
-
-			@Override
-			public Thread newThread(Runnable r) {
-				return new Thread(r, "Room Hunter");
-			}
-		});
 	}
 
 	public void start() {
-		service.scheduleWithFixedDelay(new Runnable() {
+		this.marioApi.getScheduler().scheduleAtFixedRate(60000, 60000, new ScheduledCallback() {
 
 			@Override
-			public void run() {
+			public void call() {
 				hunt();
 			}
-		}, 60, 60, TimeUnit.SECONDS);
+		});
 	}
 
 	private void hunt() {
@@ -68,15 +57,6 @@ public class RoomHunter extends BaseLoggable {
 	}
 
 	public void stop() {
-		if (service != null) {
-			service.shutdown();
-			try {
-				if (this.service.awaitTermination(3, TimeUnit.SECONDS)) {
-					this.service.shutdownNow();
-				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+
 	}
 }
