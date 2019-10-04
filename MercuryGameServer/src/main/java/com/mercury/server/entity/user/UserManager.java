@@ -48,7 +48,9 @@ public final class UserManager extends BaseEventDispatcher {
 			User user = null;
 			try {
 				user = users.remove(username);
-				userBySessionIds.remove(user.getSessionId());
+				if (user != null) {
+					userBySessionIds.remove(user.getSessionId());
+				}
 			} finally {
 				UserManager.this.dispatchEvent(new UserEvent(UserEvent.REMOVE, user, reason));
 			}

@@ -89,4 +89,8 @@ public class UserImpl implements User {
 		this.loginTime = loginTime;
 	}
 
+	@Override
+	public String toString() {
+		return this.username;
+	}
 }
